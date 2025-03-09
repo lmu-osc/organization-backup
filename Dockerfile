@@ -12,9 +12,6 @@ RUN apt-get update && apt-get install -y \
 # Copy your R script to the container
 COPY . /
 
-# Install R packages
-RUN R -e "install.packages('renv'); renv::restore()"
-
 # Set up a cron job to run the R script every month (e.g., the 1st day of every month at midnight)
 RUN echo "0 0 1 * * Rscript /backup_all_repos.R" > /etc/cron.d/run_r_script_monthly
 

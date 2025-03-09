@@ -1,0 +1,79 @@
+
+
+
+# Add a check at the beginning that the GITHUB API is set
+
+
+# get repo names
+repos <- gh::gh(
+  "/orgs/{org}/repos",
+  org = "lmu-osc",
+  type = "all",
+  per_page = 100,
+  .limit = Inf
+) %>%
+  purrr::map_chr("name") %>%
+  purrr::set_names()
+
+
+# get repo migrations
+migrations <- purrr::map(repos, ~{
+  gh::gh(
+    "POST /orgs/{org}/migrations",
+    org = "lmu-osc",
+    repositories = list(.x)
+  )
+})
+
+
+# get URLs from migrations
+migration_urls <- purrr::map(migrations, ~{
+  sprintf("%s/archive", .x[["url"]])
+})
+
+
+
+# create folders if needed
+  # general archive folder
+if (!dir.exists("archive")) {
+  dir.create("archive")
+}
+
+  # monthly archive folder
+current_ym <- format(Sys.Date(), "%Y-%m")
+if (!dir.exists(paste0("archive/", current_ym))) {
+  dir.create(paste0("archive/", current_ym))
+}
+
+
+
+
+# read repo info into memory and save results
+purrr::imap(migration_urls, ~{
+
+  # set handler
+  handle <- curl::handle_setheaders(
+    curl::new_handle(followlocation = FALSE),
+    "Authorization" = paste("token", Sys.getenv("GITHUB_LMU_OSC_PAT")),
+    "Accept" = "application/vnd.github.v3+json"
+  )
+
+  # read into memory
+  check <- curl::curl_fetch_memory(
+    url = .x,
+    handle = handle
+  )
+
+  parsed_headers <- curl::parse_headers_list(check$headers)
+
+  curl::curl_download(
+    url = parsed_headers$location,
+    destfile = paste0("archive/", current_ym, "/", .y, ".tar.gz"),
+  )
+
+})
+
+
+
+
+

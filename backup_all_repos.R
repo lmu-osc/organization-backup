@@ -1,6 +1,7 @@
 
 # Restore all packages
-renv::restore()
+renv::restore(prompt = FALSE)
+library(magrittr)
 
 # Add a check at the beginning that the GITHUB API is set
 

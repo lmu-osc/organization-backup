@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y \
   && rm -rf /var/lib/apt/lists/*
 
 # Copy your R script to the container
-COPY . /
+COPY . /archiving_code
 
 # Set up a cron job to run the R script every month (e.g., the 1st day of every month at midnight)
 RUN echo "0 0 1 * * Rscript /backup_all_repos.R" > /etc/cron.d/run_r_script_monthly

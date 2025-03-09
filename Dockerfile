@@ -16,6 +16,9 @@ RUN apt-get update && apt-get install -y \
   pandoc \
   && rm -rf /var/lib/apt/lists/*
 
+# Bootstrap renv
+RUN R -e "install.packages('renv')"
+
 # Copy your R script to the container
 COPY . /archiving_code
 

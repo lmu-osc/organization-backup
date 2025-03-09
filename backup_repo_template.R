@@ -36,3 +36,8 @@ check <- curl::curl_fetch_memory(
 parsed_headers <- curl::parse_headers_list(check$headers)
 
 parsed_headers$location
+
+curl::curl_download(
+  url = parsed_headers$location,
+  destfile = "introduction-to-renv-archive.zip"
+)

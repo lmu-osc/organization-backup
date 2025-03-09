@@ -19,18 +19,12 @@ repos <- gh::gh(
 
 
 # get repo migrations
-migrations <- purrr::map(repos, ~{
+migration_urls <- purrr::map(repos, ~{
   gh::gh(
     "POST /orgs/{org}/migrations",
     org = "lmu-osc",
     repositories = list(.x)
   )
-})
-
-
-# get URLs from migrations
-migration_urls <- purrr::map(migrations, ~{
-  sprintf("%s/archive", .x[["url"]])
 })
 
 
@@ -48,21 +42,33 @@ if (!dir.exists(paste0("archive/", current_ym))) {
 }
 
 
+# define get migration function
+get_migration_state <- function(migration_url) {
+  status <- gh::gh(migration_url)
+  status$state
+}
+
 
 
 # read repo info into memory and save results
 purrr::imap(migration_urls, ~{
 
-  # set handler
+  while (get_migration_state(migration_url = .x[["url"]]) != "exported") {
+    print("Waiting for export to complete...")
+    Sys.sleep(5)
+  }
+
   handle <- curl::handle_setheaders(
     curl::new_handle(followlocation = FALSE),
-    "Authorization" = paste("token", Sys.getenv("GITHUB_LMU_OSC_PAT")),
+    "Authorization" = paste("token", Sys.getenv("GITHUB_PAT")),
     "Accept" = "application/vnd.github.v3+json"
   )
 
+  curl_url <- sprintf("%s/archive", .x[["url"]])
+
   # read into memory
   check <- curl::curl_fetch_memory(
-    url = .x,
+    url = curl_url,
     handle = handle
   )
 

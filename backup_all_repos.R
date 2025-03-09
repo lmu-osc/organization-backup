@@ -1,5 +1,6 @@
 
-
+# Restore all packages
+renv::restore()
 
 # Add a check at the beginning that the GITHUB API is set
 

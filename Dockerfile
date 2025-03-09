@@ -1,6 +1,11 @@
 # Use an official R image as the base image
 FROM rocker/r-ver:4.4.3
 
+# Declare an argument for the GitHub PAT
+ARG GITHUB_PAT
+
+ENV GITHUB_PAT=${GITHUB_PAT}
+
 # Install dependencies
 RUN apt-get update && apt-get install -y \
   cron \

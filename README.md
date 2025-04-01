@@ -60,13 +60,17 @@ Here are some notes about the command below:
 
 * `--name github-archiver` gives the container a name that you can use to refer to it later.
 * `-d` runs the container in the background.
-* `-v ./lmu_osc_github_archive:/archive` mounts the local folder (i.e. on your computer) `./lmu_osc_github_archive` to the container folder `/archive`. This is where the downloaded archive will be stored.
+* `-v ./lmu_osc_github_archive:/archive` mounts the local folder (i.e. on your computer) `./lmu_osc_github_archive` to the container folder `/archive`. This is where the downloaded archive will be stored. Because the relative path `./lmu_osc_github_archive` is used, make sure you pay attention to where you are in your terminal when executing this by checking with `pwd`.
+    * **Note: on the OSC server, we use `/lmu_osc_github_archive` i.e. the absolute root of the server**. This is so that the output is not placed in any particular user's home space.
 * `-e GITHUB_PAT=<YOUR_TOKEN>` sets the environment variable `GITHUB_PAT` in the container to your GitHub Personal Access Token. This will then be available to the R script.
 * `lmu-osc-github-archiver` is the name of the image that you built in the previous step.
 
 ```
 # Start the container
 sudo docker run --name github-archiver -d -v ./lmu_osc_github_archive:/archive -e GITHUB_PAT=<YOUR_TOKEN> lmu-osc-github-archiver
+
+# For the OSC server only
+sudo docker run --name github-archiver -d -v /lmu_osc_github_archive:/archive -e GITHUB_PAT=<YOUR_TOKEN> lmu-osc-github-archiver
 ```
 
 #### Entering the Container

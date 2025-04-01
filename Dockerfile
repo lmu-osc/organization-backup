@@ -22,10 +22,9 @@ RUN R -e "install.packages('renv')"
 COPY . /archiving_code
 
 # Set up a cron job to run the R script every month (e.g., the 1st day of every month at midnight)
-RUN echo "0 0 1 * * Rscript /archiving_code/backup_all_repos.R" > /etc/cron.d/run_r_script_monthly
+RUN touch /var/log/cron.log \
+    && echo "0 0 1 * * Rscript /archiving_code/backup_all_repos.R" | crontab
 
-# Apply correct permissions to the cron file
-RUN chmod 0644 /etc/cron.d/run_r_script_monthly
 
 # Ensure the cron service runs when the container starts
-CMD ["cron", "-f"]
+CMD cron && tail -f /var/log/cron.log

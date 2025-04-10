@@ -16,7 +16,7 @@ old_backups <- list.files("archive") %>%
 print(paste("Old backups found: ", old_backups))
 
 
-if (length(old_backups)) {
+if (!length(old_backups)) {
   print("No old backups to remove")
 } else {
   print("Removing old backups")

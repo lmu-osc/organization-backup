@@ -23,8 +23,8 @@ RUN R -e "install.packages('renv'); renv::restore('archiving_code')"
 
 # Set up a cron job to run the R script every month (e.g., the 1st day of every month at midnight)
 RUN touch /var/log/cron.log \
-    && echo "0 0 * * 0 Rscript /archiving_code/backup_all_repos.R" > cron_jobs_script \
-    && echo "0 0 * * 0 Rscript /archiving_code/remove_old_backups.R" >> cron_jobs_script \
+    && echo "0 0 * * 0 Rscript /archiving_code/backup_all_repos.R >> /var/log/cron.log 2>&1" > cron_jobs_script \
+    && echo "0 0 * * 0 Rscript /archiving_code/remove_old_backups.R >> /var/log/cron.log 2>&1" >> cron_jobs_script \
     && crontab cron_jobs_script \
     && rm cron_jobs_script
 

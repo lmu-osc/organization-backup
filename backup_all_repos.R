@@ -1,3 +1,5 @@
+print(paste("Running backup_all_repos.R script on", Sys.Date()))
+
 # Restore all packages
 try(renv::restore(prompt = FALSE))
 try(renv::restore(project = "archiving_code", prompt = FALSE))
@@ -39,6 +41,7 @@ if (!dir.exists("archive")) {
 current_ymd <- format(Sys.Date(), "%Y-%m-%d")
 if (!dir.exists(paste0("archive/", current_ymd))) {
   dir.create(paste0("archive/", current_ymd))
+  print(paste0("Creating archive folder: archive/", current_ymd))
 }
 
 

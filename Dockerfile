@@ -27,7 +27,6 @@ RUN touch /var/log/cron.log \
     && echo "PATH=/usr/local/bin:/usr/bin:/bin" > cron_jobs_script \
     && echo "* * * * * \"cron is working at \$(date)\" >> /var/log/cron.log 2>&1" >> cron_jobs_script \
     && echo "* * * * * \"cron is working at \$(pwd)\" >> /var/log/cron.log 2>&1" >> cron_jobs_script \
-    && echo "* * * * * ls /archiving_code >> /var/log/cron.log 2>&1" >> cron_jobs_script \
     && echo "* * * * * Rscript /archiving_code/test_script.R >> /var/log/cron.log 2>&1" >> cron_jobs_script \
     && echo "0 0 * * 0 Rscript /archiving_code/backup_all_repos.R >> /var/log/cron.log 2>&1" >> cron_jobs_script \
     && echo "0 0 * * 0 Rscript /archiving_code/remove_old_backups.R >> /var/log/cron.log 2>&1" >> cron_jobs_script \

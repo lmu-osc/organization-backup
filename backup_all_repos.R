@@ -37,7 +37,7 @@ if (!dir.exists("archive")) {
   dir.create("archive")
 }
 
-# monthly archive folder
+# weekly archive folder
 current_ymd <- format(Sys.Date(), "%Y-%m-%d")
 if (!dir.exists(paste0("archive/", current_ymd))) {
   dir.create(paste0("archive/", current_ymd))

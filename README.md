@@ -3,7 +3,7 @@
 
 The code in this repo is intended to hit the GitHub API for all of our organization repos so that we can create backups of all of the code, pull requests, issues, and related metadata for all of our repos. This is mostly a worst-case, disaster back-up in case someone were to e.g. get access to our organization and delete all of the content online. Then, we would have local back-ups of our content also available.
 
-The main script for this is `backup_all_repos.R`. It is intended to be run once a month to keep the back-ups up-to-date. The script will download all of the content of all of the repos in the organization and store them in a folder called `./archive/YYYY-MM`.
+The main script for this is `backup_all_repos.R`. It is intended to be run once a week (Sunday) to keep the back-ups up-to-date. The script will download all of the content of all of the repos in the organization and store them in a folder called `./archive/YYYY-MM`.
 
 ## Getting a Github Personal Access Token (PAT)
 
@@ -26,11 +26,11 @@ If you run the script `backup_all_repos.R`, you need to put your PAT into your s
 * Add it to the `~/.Renviron` file (restart R to take the changes into effect)
 * Set it via `Sys.setenv(GITHUB_PAT = "ghp_...")`. The downloaded archive will be stored in the subfolder `./archive`.
 
-**Note that if you do the local backup approach, you will need to run the script manually once a month or set up a cron job to run the script (assuming you want monthly backups.)**
+**Note that if you do the local backup approach, you will need to run the script manually once a week or set up a cron job to run the script (assuming you want weekly backups.)**
 
 ## Running the backup in a Docker container (Recommended)
 
-The Docker container approach is recommended because it is more robust and less error-prone. This is currently run on the LMU OSC server as a service that runs once a month, but you can also run it on your local machine. A cron job within the container triggers the backup script once a month.
+The Docker container approach is recommended because it is more robust and less error-prone. This is currently run on the LMU OSC server as a service that runs once a week, but you can also run it on your local machine. A cron job within the container triggers the backup script once a week.
 
 ### Prerequisites
 

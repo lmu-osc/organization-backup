@@ -21,7 +21,7 @@ RUN apt-get update && apt-get install -y \
 # Bootstrap renv
 RUN R -e "install.packages('renv'); renv::restore('archiving_code')"
 
-# Set up a cron job to run the R script every month (e.g., the 1st day of every month at midnight)
+# Set up a cron job to run the R scripts every Sunday
 RUN touch /var/log/cron.log \
     && chmod 666 /var/log/cron.log \
     && echo "PATH=/usr/local/bin:/usr/bin:/bin" > cron_jobs_script \

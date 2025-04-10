@@ -2,7 +2,7 @@
 
 # remove back up files created more than 365 days ago
 
-print(paste("Running remove_old_backups.R script on", Sys.Date()))
+print(paste("Running remove_old_backups.R script on", Sys.time()))
 
 old_backups <- list.files("archive") %>%
   purrr::keep(~ {

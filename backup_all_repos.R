@@ -1,4 +1,4 @@
-print(paste("Running backup_all_repos.R script on", Sys.Date()))
+print(paste("Running backup_all_repos.R script on", Sys.time()))
 
 # Restore all packages
 try(renv::restore(prompt = FALSE))

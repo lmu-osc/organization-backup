@@ -78,6 +78,6 @@ purrr::imap(migration_urls, ~ {
 
   curl::curl_download(
     url = parsed_headers$location,
-    destfile = paste0("archive/", current_ym, "/", .y, ".tar.gz"),
+    destfile = paste0("archive/", current_ymd, "/", .y, ".tar.gz"),
   )
 })

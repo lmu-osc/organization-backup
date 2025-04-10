@@ -1,4 +1,3 @@
-
 # Restore all packages
 try(renv::restore(prompt = FALSE))
 try(renv::restore(project = "archiving_code", prompt = FALSE))
@@ -20,7 +19,7 @@ repos <- gh::gh(
 
 
 # get repo migrations
-migration_urls <- purrr::map(repos, ~{
+migration_urls <- purrr::map(repos, ~ {
   gh::gh(
     "POST /orgs/{org}/migrations",
     org = "lmu-osc",
@@ -31,15 +30,15 @@ migration_urls <- purrr::map(repos, ~{
 
 
 # create folders if needed
-  # general archive folder
+# general archive folder
 if (!dir.exists("archive")) {
   dir.create("archive")
 }
 
-  # monthly archive folder
-current_ym <- format(Sys.Date(), "%Y-%m")
-if (!dir.exists(paste0("archive/", current_ym))) {
-  dir.create(paste0("archive/", current_ym))
+# monthly archive folder
+current_ymd <- format(Sys.Date(), "%Y-%m-%d")
+if (!dir.exists(paste0("archive/", current_ymd))) {
+  dir.create(paste0("archive/", current_ymd))
 }
 
 
@@ -52,8 +51,7 @@ get_migration_state <- function(migration_url) {
 
 
 # read repo info into memory and save results
-purrr::imap(migration_urls, ~{
-
+purrr::imap(migration_urls, ~ {
   while (get_migration_state(migration_url = .x[["url"]]) != "exported") {
     print("Waiting for export to complete...")
     Sys.sleep(5)
@@ -79,10 +77,4 @@ purrr::imap(migration_urls, ~{
     url = parsed_headers$location,
     destfile = paste0("archive/", current_ym, "/", .y, ".tar.gz"),
   )
-
 })
-
-
-
-
-

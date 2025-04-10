@@ -13,6 +13,8 @@ old_backups <- list.files("archive") %>%
     as.Date(file.info(paste0("archive/", .x))$ctime) < (Sys.Date() - 365)
   })
 
+print(paste("Old backups found: ", old_backups))
+
 
 if (length(old_backups)) {
   print("No old backups to remove")

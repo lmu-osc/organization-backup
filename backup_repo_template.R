@@ -1,4 +1,3 @@
-
 repos <- gh::gh(
   "/orgs/{org}/repos",
   org = "lmu-osc",
@@ -17,14 +16,33 @@ migration_ex <- gh::gh(
 
 
 
-final_url <- sprintf("%s/archive", migration_ex[["url"]])
+get_migration_state <- function(migration_url) {
+  status <- gh::gh(migration_url)
+  status$state
+}
+
+while (get_migration_state(migration_url = migration_ex[["url"]]) != "exported") {
+  print("Waiting for export to complete...")
+  Sys.sleep(60)
+}
+
+
+
 
 
 handle <- curl::handle_setheaders(
   curl::new_handle(followlocation = FALSE),
-  "Authorization" = paste("token", Sys.getenv("GITHUB_LMU_OSC_PAT")),
+  "Authorization" = paste("token", Sys.getenv("GITHUB_PAT")),
   "Accept" = "application/vnd.github.v3+json"
 )
+
+
+
+
+
+
+
+final_url <- sprintf("%s/archive", migration_ex[["url"]])
 
 
 check <- curl::curl_fetch_memory(

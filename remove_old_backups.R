@@ -1,4 +1,8 @@
 
+# Restore all packages
+try(renv::restore(prompt = FALSE))
+try(renv::restore(project = "archiving_code", prompt = FALSE))
+library(magrittr)
 
 # remove back up files created more than 365 days ago
 

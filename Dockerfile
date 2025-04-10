@@ -34,4 +34,5 @@ RUN touch /var/log/cron.log \
 
 
 # Ensure the cron service runs when the container starts
-CMD cron && tail -f /var/log/cron.log
+CMD ["sh", "-c", "cron && tail -f /var/log/cron.log"]
+

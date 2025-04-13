@@ -23,7 +23,7 @@ print(paste("Old backups found: ", old_backups))
 latest_backup_date <- as.Date(min(file.info(paste0("archive/", all_backups))$ctime))
 
 if (latest_backup_date < (Sys.Date() - 180)) {
-  print("Warning! The latest backup is more than 180 days old. Please check the backups and whether the GITHUB PAT has expired.")
+  print("Warning! The latest backup is more than 180 days old. Please check the backups and whether the GITHUB PAT has expired. The script will not remove any backups.")
   emergency_backups <- old_backups
 } else {
   emergency_backups <- ""

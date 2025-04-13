@@ -6,6 +6,11 @@ try(renv::restore(project = "archiving_code", prompt = FALSE))
 library(magrittr)
 
 # Add a check at the beginning that the GITHUB API is set
+if (Sys.getenv("GITHUB_PAT") == "") {
+  stop("Please set the GITHUB_PAT environment variable.")
+} else {
+  print("GITHUB_PAT environment variable is set.")
+}
 
 
 # get repo names

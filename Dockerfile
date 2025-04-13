@@ -2,7 +2,7 @@
 FROM rocker/r-ver:4.4.3
 
 # Add a label to the Dockerfile for auto tagging of builds
-LABEL version="1.1.0" \
+LABEL version="1.1.1" \
       description="GitHub Organization backup code"
 
 # Copy your R script to the container

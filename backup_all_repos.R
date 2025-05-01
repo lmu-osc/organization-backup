@@ -44,9 +44,9 @@ if (!dir.exists("archive")) {
 
 # weekly archive folder
 current_ymd <- format(Sys.Date(), "%Y-%m-%d")
-if (!dir.exists(paste0("archive/", current_ymd))) {
-  dir.create(paste0("archive/", current_ymd))
-  print(paste0("Creating archive folder: archive/", current_ymd))
+if (!dir.exists(paste0("/archive/", current_ymd))) {
+  dir.create(paste0("/archive/", current_ymd))
+  print(paste0("Creating archive folder: /archive/", current_ymd))
 }
 
 
@@ -83,6 +83,6 @@ purrr::imap(migration_urls, ~ {
 
   curl::curl_download(
     url = parsed_headers$location,
-    destfile = paste0("archive/", current_ymd, "/", .y, ".tar.gz"),
+    destfile = paste0("/archive/", current_ymd, "/", .y, ".tar.gz"),
   )
 })

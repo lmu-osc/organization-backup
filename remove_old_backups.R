@@ -8,7 +8,7 @@ library(magrittr)
 max_backup_life_days <- 365
 max_days_before_notify_backup_failure <- 14
 
-latest_backup_date <- as.Date(min(file.info(paste0("archive/", all_backups))$ctime))
+latest_backup_date <- as.Date(min(file.info(paste0("/archive/", all_backups))$ctime))
 all_backups <- list.files("archive")
 
 print(paste("The latest backup date was on", latest_backup_date))
@@ -23,7 +23,7 @@ if (latest_backup_date <= (Sys.Date() - max_days_before_notify_backup_failure)) 
 
 old_backups <- all_backups %>%
   purrr::keep(~ {
-    as.Date(file.info(paste0("archive/", .x))$ctime) < (Sys.Date() - max_backup_life_days)
+    as.Date(file.info(paste0("/archive/", .x))$ctime) < (Sys.Date() - max_backup_life_days)
   })
 
 print(paste("Old backups found: ", old_backups))
@@ -34,7 +34,7 @@ if (!length(old_backups)) {
   print("Removing old backups")
   purrr::walk(old_backups, ~ {
     print(paste0("Removing ", .x))
-    file.remove(paste0("archive/", .x))
+    file.remove(paste0("/archive/", .x))
   })
 }
 

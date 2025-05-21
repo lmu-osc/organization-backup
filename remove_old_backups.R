@@ -5,8 +5,8 @@ try(renv::restore(project = "archiving_code", prompt = FALSE))
 library(magrittr)
 
 
-max_backup_life_days <- 365
-max_days_before_notify_backup_failure <- 14
+max_backup_life_days <- 365*1.5
+max_days_before_notify_backup_failure <- 75
 
 latest_backup_date <- as.Date(min(file.info(paste0("/archive/", all_backups))$ctime))
 all_backups <- list.files("archive")

@@ -2,7 +2,7 @@
 FROM rocker/r-ver:4.4.3
 
 # Add a label to the Dockerfile for auto tagging of builds
-LABEL version="1.1.4" \
+LABEL version="1.1.5" \
       description="GitHub Organization backup code"
 
 # Copy your R script to the container
@@ -25,8 +25,8 @@ RUN R -e "install.packages('renv'); renv::restore('archiving_code')"
 RUN touch /var/log/cron.log \
     && chmod 666 /var/log/cron.log \
     && echo "PATH=/usr/local/bin:/usr/bin:/bin" > cron_jobs_script \
-    && echo "0 0 * * 0 Rscript /archiving_code/backup_all_repos.R >> /var/log/cron.log 2>&1" >> cron_jobs_script \
-    && echo "0 0 * * 0 Rscript /archiving_code/remove_old_backups.R >> /var/log/cron.log 2>&1" >> cron_jobs_script \
+    && echo "0 0 1 * * Rscript /archiving_code/backup_all_repos.R >> /var/log/cron.log 2>&1" >> cron_jobs_script \
+    && echo "0 0 1 * * Rscript /archiving_code/remove_old_backups.R >> /var/log/cron.log 2>&1" >> cron_jobs_script \
     && crontab cron_jobs_script \
     && rm cron_jobs_script
 

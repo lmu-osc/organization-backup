@@ -1,0 +1,14 @@
+services:
+  github-archiver:
+    container_name: github-archiver
+    build:
+      context: .
+    image: lmu-osc-github-archiver
+    restart: unless-stopped
+    environment:
+      # Set in your shell or a .env file next to this compose file.
+      GITHUB_PAT: ${GITHUB_PAT}
+      # Optional: set to your timezone, e.g. America/Los_Angeles.
+      TZ: ${TZ:-UTC}
+    volumes:
+      - ./lmu_osc_github_archive:/archive

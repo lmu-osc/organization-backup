@@ -43,7 +43,7 @@ The Docker Compose approach is recommended because it is more robust and less er
 
 ### Start the service
 
-This repository includes [docker-compose.yml](docker-compose.yml), which builds and starts the backup service. The downloaded archive is stored in the container folder `/archive` and on your local drive at `./lmu_osc_github_archive`.
+This repository includes [docker-compose.yml](docker-compose.yml), which builds and starts the backup service. The downloaded archive is stored in the container folder `/archive` and on the host at `/srv/backups/github`.
 
 Before starting, set your PAT in the environment:
 
@@ -66,8 +66,14 @@ docker compose logs -f
 Notes:
 
 * The service is named `github-archiver`.
-* The local folder `./lmu_osc_github_archive` is mounted to `/archive` in the container.
-* On the OSC server, if you want to store output at `/lmu_osc_github_archive` instead, edit [docker-compose.yml](docker-compose.yml) and change the volume mapping.
+* The host folder `/srv/backups/github` is mounted to `/archive` in the container.
+* If needed, edit [docker-compose.yml](docker-compose.yml) to change the volume mapping.
+
+If `/srv/backups/github` does not exist yet, create it first:
+
+```sh
+sudo mkdir -p /srv/backups/github
+```
 
 #### Entering the Container
 
@@ -113,7 +119,7 @@ docker compose exec github-archiver bash
 export GITHUB_PAT=<NEW_TOKEN>
 ```
 
-## What happens if I modify/delete the files at `./lmu_osc_github_archive` on my system or at `/archive` in the container?
+## What happens if I modify/delete the files at `/srv/backups/github` on my system or at `/archive` in the container?
 
 You should think of these locations as the same folder. If you delete files in one location, they will be deleted in the other location. If you modify files in one location, they will be modified in the other location. This is because the folder is mounted from your local system to the container.
 

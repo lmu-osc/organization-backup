@@ -11,4 +11,4 @@ services:
       # Optional: set to your timezone, e.g. America/Los_Angeles.
       TZ: ${TZ:-UTC}
     volumes:
-      - ./lmu_osc_github_archive:/archive
+      - /srv/backups/github:/archive

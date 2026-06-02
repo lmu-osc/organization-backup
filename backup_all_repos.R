@@ -21,6 +21,8 @@ if (file.exists(renv_activate)) {
   log_msg(paste("renv activation file not found:", renv_activate), "WARN")
 }
 
+library(magrittr)
+
 # Verify GitHub PAT
 if (Sys.getenv("GITHUB_PAT") == "") {
   log_msg("GITHUB_PAT environment variable not set", "ERROR")

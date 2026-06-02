@@ -11,19 +11,15 @@ log_msg <- function(msg, level = "INFO") {
 
 log_msg("Starting backup_all_repos.R script")
 
-# Restore packages with error handling
-log_msg("Restoring renv packages...")
-renv_result <- tryCatch({
-  renv::restore(prompt = FALSE)
-  renv::restore(project = "archiving_code", prompt = FALSE)
-  "success"
-}, error = function(e) {
-  log_msg(paste("Warning: renv restore failed:", e$message), "WARN")
-  "failure"
-})
-
-# Load libraries
-library(magrittr)
+# Activate the project library without trying to restore packages at runtime.
+project_root <- "/archiving_code"
+renv_activate <- file.path(project_root, "renv", "activate.R")
+if (file.exists(renv_activate)) {
+  source(renv_activate)
+  log_msg(paste("Activated renv project:", project_root))
+} else {
+  log_msg(paste("renv activation file not found:", renv_activate), "WARN")
+}
 
 # Verify GitHub PAT
 if (Sys.getenv("GITHUB_PAT") == "") {
@@ -54,7 +50,7 @@ retry_api_call <- function(expr, max_attempts = 3, wait_time = 2) {
 
 # Get repo names with retry
 log_msg("Fetching repository list...")
-repos <- retry_api_call({
+repos_raw <- retry_api_call({
   gh::gh(
     "/orgs/{org}/repos",
     org = "lmu-osc",
@@ -62,50 +58,48 @@ repos <- retry_api_call({
     per_page = 100,
     .limit = Inf
   ) %>%
-    purrr::map_chr("name") %>%
-    purrr::set_names()
+    identity()
 }, max_attempts = 3)
+
+repo_names <- vapply(repos_raw, function(repo) repo[["name"]], character(1))
+repos <- stats::setNames(repo_names, repo_names)
 
 log_msg(paste("Found", length(repos), "repositories to backup"))
 
 # Get repo migrations with error handling
 log_msg("Initiating migrations...")
-migration_urls <- purrr::imap_dfr(repos, ~ {
-  result <- tryCatch({
+migration_rows <- lapply(seq_along(repos), function(i) {
+  repo_name <- names(repos)[i]
+  tryCatch({
     url_result <- retry_api_call({
       gh::gh(
         "POST /orgs/{org}/migrations",
         org = "lmu-osc",
-        repositories = list(.x)
+        repositories = list(repos[[i]])
       )
     }, max_attempts = 3)
-    
+
     data.frame(
-      repo = .y,
+      repo = repo_name,
       url = url_result[["url"]],
       state = "pending",
       stringsAsFactors = FALSE
     )
   }, error = function(e) {
-    log_msg(paste("Failed to initiate migration for", .y, ":", e$message), "ERROR")
+    log_msg(paste("Failed to initiate migration for", repo_name, ":", e$message), "ERROR")
     data.frame(
-      repo = .y,
+      repo = repo_name,
       url = NA,
       state = "failed",
       stringsAsFactors = FALSE
     )
   })
-  result
 })
 
-# Create archive directories
-if (!dir.exists("archive")) {
-  dir.create("archive")
-  log_msg("Created archive directory")
-}
+migration_urls <- do.call(rbind, migration_rows)
 
 current_ymd <- format(Sys.Date(), "%Y-%m-%d")
-archive_dir <- paste0("/archive/", current_ymd)
+archive_dir <- file.path("/archive", current_ymd)
 if (!dir.exists(archive_dir)) {
   dir.create(archive_dir, recursive = TRUE)
   log_msg(paste("Created archive folder:", archive_dir))
@@ -153,13 +147,12 @@ get_migration_state <- function(migration_url, max_wait_seconds = 3600) {
 }
 
 # Download results with error handling
-results_summary <- purrr::pmap_df(
-  list(
-    repo = migration_urls$repo,
-    migration_url = migration_urls$url,
-    initial_state = migration_urls$state
-  ),
-  function(repo, migration_url, initial_state) {
+results_rows <- lapply(seq_len(nrow(migration_urls)), function(i) {
+  repo <- migration_urls$repo[i]
+  migration_url <- migration_urls$url[i]
+  initial_state <- migration_urls$state[i]
+
+  tryCatch({
     log_msg(paste("Processing repository:", repo))
     
     if (is.na(migration_url) || initial_state == "failed") {
@@ -283,8 +276,19 @@ results_summary <- purrr::pmap_df(
         stringsAsFactors = FALSE
       )
     })
-  }
-)
+  }, error = function(e) {
+    log_msg(paste("Unexpected error processing", repo, ":", e$message), "ERROR")
+    data.frame(
+      repo = repo,
+      status = "error",
+      reason = e$message,
+      timestamp = Sys.time(),
+      stringsAsFactors = FALSE
+    )
+  })
+})
+
+results_summary <- do.call(rbind, results_rows)
 
 # Summary report
 log_msg("=== BACKUP SUMMARY ===")

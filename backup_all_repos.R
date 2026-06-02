@@ -21,8 +21,6 @@ if (file.exists(renv_activate)) {
   log_msg(paste("renv activation file not found:", renv_activate), "WARN")
 }
 
-library(magrittr)
-
 # Verify GitHub PAT
 if (Sys.getenv("GITHUB_PAT") == "") {
   log_msg("GITHUB_PAT environment variable not set", "ERROR")
@@ -59,8 +57,7 @@ repos_raw <- retry_api_call({
     type = "all",
     per_page = 100,
     .limit = Inf
-  ) %>%
-    identity()
+  )
 }, max_attempts = 3)
 
 repo_names <- vapply(repos_raw, function(repo) repo[["name"]], character(1))

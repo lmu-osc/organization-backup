@@ -1,8 +1,6 @@
 # Restore all packages
 try(renv::restore(prompt = FALSE))
 try(renv::restore(project = "archiving_code", prompt = FALSE))
-library(magrittr)
-
 
 
 max_backup_life_days <- 365*1.5
@@ -26,11 +24,9 @@ if (latest_backup_date <= (Sys.Date() - max_days_before_notify_backup_failure)) 
 }
 
 
-
-old_backups <- all_backups %>%
-  purrr::keep(~ {
-    as.Date(file.info(paste0("/archive/", .x))$ctime) < (Sys.Date() - max_backup_life_days)
-  })
+old_backups <- purrr::keep(all_backups, function(backup_name) {
+  as.Date(file.info(paste0("/archive/", backup_name))$ctime) < (Sys.Date() - max_backup_life_days)
+})
 
 print(paste("Old backups found: ", old_backups))
 

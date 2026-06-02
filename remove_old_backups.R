@@ -1,3 +1,9 @@
+# Restore all packages
+try(renv::restore(prompt = FALSE))
+try(renv::restore(project = "archiving_code", prompt = FALSE))
+library(magrittr)
+
+
 
 max_backup_life_days <- 365*1.5
 max_days_before_notify_backup_failure <- 75

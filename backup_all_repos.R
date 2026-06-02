@@ -16,6 +16,10 @@ project_root <- "/archiving_code"
 renv_activate <- file.path(project_root, "renv", "activate.R")
 if (file.exists(renv_activate)) {
   source(renv_activate)
+
+  log_msg("restoring from renv.lock", "WARN")
+  renv::restore(project = project_root, prompt = FALSE)
+
   log_msg(paste("Activated renv project:", project_root))
 } else {
   log_msg(paste("renv activation file not found:", renv_activate), "WARN")

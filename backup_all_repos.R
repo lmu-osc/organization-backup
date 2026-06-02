@@ -11,20 +11,6 @@ log_msg <- function(msg, level = "INFO") {
 
 log_msg("Starting backup_all_repos.R script")
 
-# Restore packages with error handling
-log_msg("Restoring renv packages...")
-renv_result <- tryCatch({
-  renv::restore(prompt = FALSE)
-  renv::restore(project = "archiving_code", prompt = FALSE)
-  "success"
-}, error = function(e) {
-  log_msg(paste("Warning: renv restore failed:", e$message), "WARN")
-  "failure"
-})
-
-# Load libraries
-library(magrittr)
-
 # Verify GitHub PAT
 if (Sys.getenv("GITHUB_PAT") == "") {
   log_msg("GITHUB_PAT environment variable not set", "ERROR")
@@ -55,57 +41,58 @@ retry_api_call <- function(expr, max_attempts = 3, wait_time = 2) {
 # Get repo names with retry
 log_msg("Fetching repository list...")
 repos <- retry_api_call({
-  gh::gh(
+  repo_data <- gh::gh(
     "/orgs/{org}/repos",
     org = "lmu-osc",
     type = "all",
     per_page = 100,
     .limit = Inf
-  ) %>%
-    purrr::map_chr("name") %>%
-    purrr::set_names()
+  )
+  repo_names <- purrr::map_chr(repo_data, "name")
+  stats::setNames(repo_names, repo_names)
 }, max_attempts = 3)
 
 log_msg(paste("Found", length(repos), "repositories to backup"))
 
 # Get repo migrations with error handling
 log_msg("Initiating migrations...")
-migration_urls <- purrr::imap_dfr(repos, ~ {
-  result <- tryCatch({
+migration_rows <- purrr::imap(repos, function(repo_name, repo_label) {
+  tryCatch({
     url_result <- retry_api_call({
       gh::gh(
         "POST /orgs/{org}/migrations",
         org = "lmu-osc",
-        repositories = list(.x)
+        repositories = list(repo_name)
       )
     }, max_attempts = 3)
-    
+
     data.frame(
-      repo = .y,
+      repo = repo_label,
       url = url_result[["url"]],
       state = "pending",
       stringsAsFactors = FALSE
     )
   }, error = function(e) {
-    log_msg(paste("Failed to initiate migration for", .y, ":", e$message), "ERROR")
+    log_msg(paste("Failed to initiate migration for", repo_label, ":", e$message), "ERROR")
     data.frame(
-      repo = .y,
+      repo = repo_label,
       url = NA,
       state = "failed",
       stringsAsFactors = FALSE
     )
   })
-  result
 })
 
+migration_urls <- do.call(rbind, migration_rows)
+
 # Create archive directories
-if (!dir.exists("archive")) {
-  dir.create("archive")
+if (!dir.exists("/archive")) {
+  dir.create("/archive", recursive = TRUE)
   log_msg("Created archive directory")
 }
 
 current_ymd <- format(Sys.Date(), "%Y-%m-%d")
-archive_dir <- paste0("/archive/", current_ymd)
+archive_dir <- file.path("/archive", current_ymd)
 if (!dir.exists(archive_dir)) {
   dir.create(archive_dir, recursive = TRUE)
   log_msg(paste("Created archive folder:", archive_dir))
@@ -153,12 +140,7 @@ get_migration_state <- function(migration_url, max_wait_seconds = 3600) {
 }
 
 # Download results with error handling
-results_summary <- purrr::pmap_df(
-  list(
-    repo = migration_urls$repo,
-    migration_url = migration_urls$url,
-    initial_state = migration_urls$state
-  ),
+results_rows <- Map(
   function(repo, migration_url, initial_state) {
     log_msg(paste("Processing repository:", repo))
     
@@ -285,6 +267,8 @@ results_summary <- purrr::pmap_df(
     })
   }
 )
+
+results_summary <- do.call(rbind, results_rows)
 
 # Summary report
 log_msg("=== BACKUP SUMMARY ===")
